@@ -1,6 +1,6 @@
 import { FetchOptions, SimpleAdapter } from "../../adapters/types";
 import { CHAIN } from "../../helpers/chains";
-import { getSolanaReceived, addTokensReceived } from "../../helpers/token";
+import { getSolanaReceived, getETHReceived } from "../../helpers/token";
 import { fetchBuilderCodeRevenue } from "../../helpers/hyperliquid";
 
 const TREASURY_ADDRESS_PER_CHAIN: { [chain: string]: string } = {
@@ -9,12 +9,6 @@ const TREASURY_ADDRESS_PER_CHAIN: { [chain: string]: string } = {
   [CHAIN.BASE]: "0x2baF303aa7b9798c7C89338Bdea2e53B72868E42",
   [CHAIN.SOLANA]: "BMVjS5nQMgRoDxQ1fYfEFAvU6JzrPCtbTPxqDH1MJqEd",
   [CHAIN.HYPERLIQUID]: "0x761591e46a19e4e18b5a14bcc8565feca17f7278",
-};
-
-const EVM_CHAIN_TOKEN: { [chain: string]: string } = {
-  [CHAIN.ETHEREUM]: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-  [CHAIN.BSC]: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-  [CHAIN.BASE]: "0x4200000000000000000000000000000000000006",
 };
 
 const fetch = async (options: FetchOptions) => {
@@ -31,11 +25,10 @@ const fetch = async (options: FetchOptions) => {
       builder_address: TREASURY_ADDRESS_PER_CHAIN[options.chain],
     });
   } else {
-    await addTokensReceived({
+    await getETHReceived({
       options,
       balances: dailyFees,
-      tokens: [EVM_CHAIN_TOKEN[options.chain]],
-      targets: [TREASURY_ADDRESS_PER_CHAIN[options.chain]],
+      target: TREASURY_ADDRESS_PER_CHAIN[options.chain],
     });
   }
 
@@ -48,27 +41,16 @@ const methodology = {
   ProtocolRevenue: "Trading fees are collected by TrySpark protocol.",
 };
 
-// const adapter: SimpleAdapter = {
-//   version: 2,
-//   fetch,
-//   chains: [
-//     CHAIN.HYPERLIQUID,
-//     // CHAIN.SOLANA,
-//     CHAIN.BSC,
-//     CHAIN.BASE,
-//     CHAIN.ETHEREUM,
-//   ],
-//   start: "2025-07-20",
-//   methodology,
-// };
-
 const adapter: SimpleAdapter = {
   version: 2,
   adapter: {
-    [CHAIN.HYPERLIQUID]: { fetch, start: "2025-01-16" },
+    [CHAIN.SOLANA]: { fetch, start: "2025-02-26" },
+    [CHAIN.HYPERLIQUID]: { fetch, start: "2025-02-27" },
+    [CHAIN.BSC]: { fetch, start: "2025-08-21" },
+    [CHAIN.ETHEREUM]: { fetch, start: "2025-08-21" },
+    [CHAIN.BASE]: { fetch, start: "2025-07-28" },
   },
   methodology,
-  isExpensiveAdapter: true,
 };
 
 export default adapter;
